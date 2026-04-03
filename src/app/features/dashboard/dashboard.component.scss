@@ -1,0 +1,100 @@
+:host {
+  display: block;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.kpi-card {
+  transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tab-active {
+  border-bottom: 2px solid #2563eb;
+  color: #1e40af;
+}
+
+.tab-inactive {
+  color: #64748b;
+}
+
+.table-wrapper {
+  height: 420px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-wrapper table {
+  flex-shrink: 0;
+}
+
+.badge {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.badge-green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-yellow {
+  background: #fef9c3;
+  color: #854d0e;
+  border: 1px solid #fef08a;
+}
+
+.badge-red {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.dot-idle {
+  background: #64748b;
+}
+
+.dot-running {
+  background: #22c55e;
+  animation: pulse 1.5s infinite;
+}
+
+.dot-error {
+  background: #ef4444;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
