@@ -101,9 +101,9 @@
       <div [class.hidden]="currentTab !== 'dashboard'" class="flex-1 overflow-y-auto">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
           <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
-            <div class="text-xs text-slate-500 font-semibold mb-1">Match Rate</div>
-            <div class="text-3xl font-bold text-green-600 mono">{{ kpiMatchRate }}</div>
-            <div class="text-xs text-slate-400 mt-1">Packages matched</div>
+            <div class="text-xs text-slate-500 font-semibold mb-1">Compliance Match Rate</div>
+            <div class="text-3xl font-bold text-emerald-600 mono">{{ kpiMatchRate }}</div>
+            <div class="text-xs text-slate-400 mt-1">Of total packages</div>
           </div>
           <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
             <div class="text-xs text-slate-500 font-semibold mb-1">Unmatched Rate</div>
@@ -195,7 +195,7 @@
 
       <div [class.hidden]="currentTab !== 'table'" class="flex-1 flex flex-col overflow-hidden">
         <div class="bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col overflow-hidden mb-6" style="max-height: 560px;">
-          <div class="h-12 border-b border-slate-200 flex items-center justify-between px-4 bg-slate-50/50 flex-shrink-0 gap-3">
+          <div class="h-12 border-b border-slate-200 flex items-center justify-between px-4 bg-slate-50/50 flex-shrink-0 gap-3 relative z-20">
             <div class="flex items-center gap-2 flex-wrap">
               <h2 class="font-bold text-slate-700 text-sm mr-2">Ingestion Results</h2>
               @if (hasSelection) {
@@ -209,7 +209,6 @@
               <select
                 [(ngModel)]="statusFilter"
                 (ngModelChange)="onStatusFilterChange()"
-                [disabled]="isTableLoading"
                 class="border border-slate-300 rounded text-xs px-2 py-1 bg-white focus:outline-none focus:border-blue-500"
                 >
                 <option value="ALL">Show All</option>
@@ -220,7 +219,6 @@
               <select
                 [(ngModel)]="methodFilter"
                 (ngModelChange)="onMethodFilterChange()"
-                [disabled]="isTableLoading"
                 class="border border-slate-300 rounded text-xs px-2 py-1 bg-white focus:outline-none focus:border-blue-500"
                 >
                 @for (method of filteredMethodOptions; track method) {
@@ -233,12 +231,11 @@
                 [(ngModel)]="searchTerm"
                 (keyup)="onSearchChange()"
                 type="text"
-                placeholder="Search by package name..."
-                [disabled]="isTableLoading"
+                placeholder="Search software..."
                 class="border border-slate-300 rounded text-xs px-2 py-1 bg-white focus:outline-none focus:border-blue-500 w-56"
                 />
               </div>
-              <div class="flex gap-2 items-center">
+              <div class="flex gap-2 items-center relative z-30">
                 <button
                   (click)="toggleAIFilter()"
                   [disabled]="isTableLoading"

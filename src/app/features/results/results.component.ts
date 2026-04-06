@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, ResultItem, ResultsResponse } from '../../core/services/api.service';
+import { ResultItem } from '../../core/services/api.service';
+import { MonitorStateService } from 'src/app/core/state/monitor-state.service';
+import { Subject, takeUntil } from 'rxjs';
 
 const STATUS_TABS = ['ALL', 'FOUND', 'REVIEW', 'NOT_FOUND'] as const;
 
@@ -20,7 +22,12 @@ const STATUS_TABS = ['ALL', 'FOUND', 'REVIEW', 'NOT_FOUND'] as const;
       </div>
 
       <!-- Search -->
-      <input class="search-input" placeholder="Filter by package name..." [(ngModel)]="searchTerm" />
+
+<input
+  class="search-input"
+  placeholder="Filter by package name..."
+  [(ngModel)]="searchTerm"
+  (ngModelChange)="onSearchChange()" />
 
       <!-- Table -->
       <div class="table-wrapper">
@@ -37,7 +44,7 @@ const STATUS_TABS = ['ALL', 'FOUND', 'REVIEW', 'NOT_FOUND'] as const;
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of filteredRows">
+            <tr *ngFor="let row of filteredRows; trackBy: trackRow">
               <td>{{ row.package_name }}</td>
               <td>{{ row.publisher }}</td>
               <td><span class="status-badge" [ngClass]="row.status.toLowerCase()">{{ row.status }}</span></td>
@@ -80,32 +87,83 @@ export class ResultsComponent implements OnInit {
   limit = 50;
   totalPages = 1;
 
-  constructor(private api: ApiService) {}
+constructor(private state: MonitorStateService) {}
 
-  ngOnInit(): void { this.load(); }
+onSearchChange(): void {
+  this.applyFilter();
+}
 
-  load(): void {
-    this.api.getResults(this.page, this.limit, this.activeTab).subscribe((res: ResultsResponse) => {
-      this.rows = res.data;
-      this.totalPages = res.total_pages;
-    });
+trackRow(_: number, row: ResultItem) {
+  return row.package_name + row.publisher;
+}
+
+switchTab(tab: string): void {
+  this.activeTab = tab;
+  this.page = 1;
+
+  this.state.resultsFilter$.next({
+    status: tab,
+    page: this.page,
+    limit: this.limit
+  });
+}
+
+filteredRows: ResultItem[] = [];
+
+private destroy$ = new Subject<void>();
+
+ngOnInit(): void {
+  this.state.results$.pipe(takeUntil(this.destroy$)).subscribe(rows => {
+    this.rows = rows;
+    this.applyFilter();
+  });
+}
+
+
+ngOnDestroy(): void {
+  this.destroy$.next();
+  this.destroy$.complete();
+}
+
+
+applyFilter(): void {
+  if (!this.searchTerm) {
+    this.filteredRows = this.rows;
+    return;
   }
 
-  switchTab(tab: string): void {
-    this.activeTab = tab;
-    this.page = 1;
-    this.load();
-  }
+  const q = this.searchTerm.toLowerCase();
+  this.filteredRows = this.rows.filter(r =>
+    r.package_name?.toLowerCase().includes(q)
+  );
+}
 
-  get filteredRows(): ResultItem[] {
-    if (!this.searchTerm) return this.rows;
-    const q = this.searchTerm.toLowerCase();
-    return this.rows.filter(r => r.package_name?.toLowerCase().includes(q));
-  }
 
-  prevPage(): void { if (this.page > 1) { this.page--; this.load(); } }
-  nextPage(): void { if (this.page < this.totalPages) { this.page++; this.load(); } }
-  export(): void { this.api.exportResults(this.activeTab); }
+prevPage(): void {
+  if (this.page > 1) {
+    this.page--;
+    this.pushFilter();
+  }
+}
+
+nextPage(): void {
+  if (this.page < this.totalPages) {
+    this.page++;
+    this.pushFilter();
+  }
+}
+
+
+private pushFilter(): void {
+  this.state.resultsFilter$.next({
+    status: this.activeTab,
+    page: this.page,
+    limit: this.limit
+  });
+}
+
+
+  export(): void { this.state.exportResults(this.activeTab); }
 
   bucketColor(bucket: string): string {
     const map: Record<string, string> = {

@@ -1,4 +1,6 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+
 import {
   EMPTY,
   Subject,
@@ -10,8 +12,11 @@ import {
   forkJoin,
   retry,
   switchMap,
+  exhaustMap,
+  take,
   takeUntil,
   timer,
+  filter
 } from 'rxjs';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import {
@@ -22,12 +27,13 @@ import {
   ResultItem,
   StatsResponse,
 } from '../../core/services/api.service';
+import { MonitorStateService } from 'src/app/core/state/monitor-state.service';
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
-   standalone: false,
+  standalone: false,
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
@@ -53,16 +59,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedRecords: BulkRecord[] = [];
 
   stats: StatsResponse = { phase: 'Idle', found: 0, review: 0, notfound: 0 };
-  kpi: KpiResponse = {};
-  chartData: ChartDataResponse = {
-    compliant: 0,
-    shadowit: 0,
-    review: 0,
-    exact_count: 0,
-    ai_count: 0,
-    manual_count: 0,
-    method_labels: ['Exact', 'AI', 'Manual'],
-  };
+  kpi: KpiResponse = {} as KpiResponse;
+  chartData: ChartDataResponse = {} as ChartDataResponse;
 
   isDashboardLoading = true;
   isTableLoading = false;
@@ -82,13 +80,67 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private statusChart?: Chart;
   private methodChart?: Chart;
 
-  constructor(private api: ApiService) {}
 
-  ngOnInit(): void {
-    this.setupSearchDebounce();
-    this.loadInitialState();
-    this.startPolling();
-  }
+constructor(
+  private api: ApiService,
+  public state: MonitorStateService,
+  private cdr: ChangeDetectorRef
+) {}
+
+ngOnInit(): void {
+  this.setupSearchDebounce();
+
+  this.state.stats$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(s => {
+      if (s) {
+        this.stats = s;
+        this.state.updateDataReady(s, this.kpi);
+        this.cdr.markForCheck();
+      }
+    });
+
+  this.state.kpi$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(k => {
+      if (k) {
+        this.kpi = k;
+        this.state.updateDataReady(this.stats, k);
+        this.cdr.markForCheck();
+      }
+    });
+
+  this.state.chartData$ // Moved this subscription up for better logical grouping
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(c => {
+      if (c) {
+        this.chartData = c;
+        this.applyChartData();
+        this.cdr.markForCheck();
+      }
+    });
+
+  // Subscribe to results to populate the table rows
+  this.state.results$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(r => {
+      this.rows = r || [];
+      this.cdr.markForCheck();
+    });
+
+  // Start loading data immediately
+  this.loadInitialState();
+
+  this.state.resultsFilter$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(f => {
+      this.statusFilter = f.status;
+      this.currentPage = f.page;
+      this.refreshTable(true);
+    });
+
+  this.startPolling();
+}
 
   get isPipelinePhaseActive(): boolean {
     const phase = (this.phaseText || '').toLowerCase();
@@ -104,9 +156,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.isPipelineStarting || this.isCleanupRunning || this.isAiRunning || this.isPipelinePhaseActive;
   }
 
-  ngAfterViewInit(): void {
-    this.initializeCharts();
-  }
+ngAfterViewInit(): void {
+  this.state.dataReady$
+    .pipe(filter(Boolean), takeUntil(this.destroy$))
+    .subscribe(() => {
+      this.initializeCharts();
+    });
+}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -117,7 +173,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get phaseText(): string {
-    return this.stats.phase || 'Idle';
+    return this.stats?.phase ?? 'Idle';
   }
 
   get statusIndicatorClass(): string {
@@ -171,12 +227,22 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     return methodsByStatus[this.statusFilter] ?? methodsByStatus.ALL;
   }
 
-  switchTab(tab: 'dashboard' | 'table'): void {
+  switchTab(tab: 'dashboard' | 'table') {
     this.currentTab = tab;
     this.error = '';
     this.audit('tab_switched', { tab });
+
+    if (tab === 'dashboard') {
+      // Ensure charts are drawn when switching back to the dashboard tab
+      setTimeout(() => this.initializeCharts(), 50);
+    }
+
     if (tab === 'table') {
-      this.refreshTable(false);
+      this.state.resultsFilter$.next({
+        status: this.statusFilter,
+        page: this.currentPage,
+        limit: this.pageSize
+      });
     }
   }
 
@@ -324,7 +390,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         if (res?.already_running) {
           this.error = `Pipeline already running (${res.phase || this.phaseText}).`;
         }
-        this.loadInitialState();
+        this.state.resetDataReady();
       },
       error: (err) => {
         this.isPipelineStarting = false;
@@ -350,7 +416,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.api.runAiAnalysis(this.statusFilter).subscribe({
       next: () => {
         this.isAiRunning = false;
-        this.loadInitialState();
+        this.state.resetDataReady();
       },
       error: (err) => {
         this.isAiRunning = false;
@@ -419,19 +485,19 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get kpiMatchRate(): string {
-    return `${this.toPercent(this.kpi.match_rate)}%`;
+    return this.kpi ? `${this.toPercent(this.kpi.match_rate)}%` : '—';
   }
 
   get kpiReviewRate(): string {
-    return `${this.toPercent(this.kpi.review_rate)}%`;
+    return this.kpi ? `${this.toPercent(this.kpi.review_rate)}%` : '—';
   }
 
   get kpiUnmatchedRate(): string {
-    return `${this.toPercent(this.kpi.unmatched_rate)}%`;
+    return this.kpi ? `${this.toPercent(this.kpi.unmatched_rate)}%` : '—';
   }
 
   get kpiAiEffectiveness(): string {
-    return `${this.toPercent(this.kpi.ai_effectiveness)}%`;
+    return this.kpi ? `${this.toPercent(this.kpi.ai_effectiveness)}%` : '—';
   }
 
   get kpiTotalPackages(): number {
@@ -498,13 +564,20 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe({
+
         next: (result) => {
+          // Assign local variables first to ensure they are available for updateDataReady
           this.stats = result.stats;
           this.kpi = result.kpi;
           this.chartData = result.chart;
+
+          this.state.stats$.next(result.stats);
+          this.state.kpi$.next(result.kpi);
+          this.state.chartData$.next(result.chart);
+          this.state.updateDataReady(result.stats, result.kpi); // Ensure dataReady is set after initial load
+
           this.lastSyncLabel = new Date().toLocaleTimeString();
-          this.applyChartData();
-          this.refreshTable(false);
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.error = this.extractError(err, 'Failed to load dashboard data.');
@@ -534,10 +607,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (stats) => {
           this.pollFailureCount = 0;
           this.isPollingHealthy = true;
-          this.stats = stats;
+          this.state.stats$.next(stats);
           this.lastSyncLabel = new Date().toLocaleTimeString();
           this.statsPollTick += 1;
-
+          
           const phase = (stats.phase || '').toLowerCase();
           if (phase.includes('deterministic') || phase.includes('fuzzy') || phase.includes('matching')) {
             // Reduce heavy KPI/chart fetches while pipeline is running.
@@ -549,9 +622,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
               })
                 .pipe(takeUntil(this.destroy$))
                 .subscribe(({ kpi, chart }) => {
-                  this.kpi = kpi;
-                  this.chartData = chart;
-                  this.applyChartData();
+                  this.state.stats$.next(stats);
+                  this.state.kpi$.next(kpi);
+                  this.state.chartData$.next(chart);
                 });
             }
 
@@ -612,7 +685,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
           const rows = response.data || [];
           this.totalRows = response.total || rows.length;
           this.totalPages = Math.max(1, response.total_pages || 1);
-          this.rows = rows;
+          this.state.results$.next(rows);
 
           if (this.currentPage > this.totalPages) {
             this.currentPage = 1;
@@ -636,48 +709,67 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const statusConfig: ChartConfiguration<'doughnut'> = {
-      type: 'doughnut',
-      data: {
-        labels: ['Compliant', 'Shadow IT', 'Review'],
-        datasets: [{
-          data: [0, 0, 0],
-          backgroundColor: ['#86efac', '#fca5a5', '#fde047'],
-          borderColor: '#ffffff',
-          borderWidth: 2,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } },
-      },
-    };
+    // Capture native elements locally to satisfy TS compiler inside setTimeout closure
+    const statusEl = this.statusCanvas.nativeElement;
+    const methodEl = this.methodCanvas.nativeElement;
 
-    const methodConfig: ChartConfiguration<'doughnut'> = {
-      type: 'doughnut',
-      data: {
-        labels: ['Exact', 'AI', 'Manual'],
-        datasets: [{
-          data: [0, 0, 0],
-          backgroundColor: ['#10b981', '#a855f7', '#3b82f6'],
-          borderColor: '#ffffff',
-          borderWidth: 2,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } },
-      },
-    };
+    // Wrap in timeout to ensure DOM has finalized dimensions
+    setTimeout(() => {
+      this.statusChart?.destroy();
+      this.methodChart?.destroy();
 
-    this.statusChart = new Chart(this.statusCanvas.nativeElement, statusConfig);
-    this.methodChart = new Chart(this.methodCanvas.nativeElement, methodConfig);
-    this.applyChartData();
+      const statusConfig: ChartConfiguration<'doughnut'> = {
+        type: 'doughnut',
+        data: {
+          labels: ['Compliant', 'Shadow IT', 'Review'],
+          datasets: [{
+            data: [0, 0, 0],
+            backgroundColor: ['#86efac', '#fca5a5', '#fde047'],
+            borderColor: '#ffffff',
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+        },
+      };
+
+      const methodConfig: ChartConfiguration<'doughnut'> = {
+        type: 'doughnut',
+        data: {
+          labels: ['Exact', 'AI', 'Manual'],
+          datasets: [{
+            data: [0, 0, 0],
+            backgroundColor: ['#10b981', '#a855f7', '#3b82f6'],
+            borderColor: '#ffffff',
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+        },
+      };
+
+      this.statusChart = new Chart(statusEl, statusConfig);
+      this.methodChart = new Chart(methodEl, methodConfig);
+
+      if (this.chartData && Object.keys(this.chartData).length > 0) {
+        this.applyChartData();
+      }
+    }, 0);
   }
 
   private applyChartData(): void {
+    if (!this.statusChart || !this.methodChart) {
+      // If data arrives before view is ready, trigger initialization
+      this.initializeCharts();
+      return;
+    }
+
     if (this.statusChart) {
       this.statusChart.data.datasets[0].data = [
         this.toNumber(this.chartData.compliant),
@@ -690,11 +782,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.methodChart) {
       const labels = this.chartData.method_labels || ['Exact', 'AI', 'Manual'];
       this.methodChart.data.labels = labels;
-      this.methodChart.data.datasets[0].data = [
-        this.toNumber(this.chartData.exact_count),
-        this.toNumber(this.chartData.ai_count),
-        this.toNumber(this.chartData.manual_count),
-      ];
+
+      // Dynamically map data to match the labels returned by the backend
+      const data = labels.map(label => {
+        const l = label.toUpperCase();
+        if (l === 'EXACT') return this.toNumber(this.chartData.exact_count);
+        if (l === 'AI' || l === 'AI-CLEANUP') return this.toNumber(this.chartData.ai_count);
+        return 0; // Fallback for 'Manual' or other labels
+      });
+
+      this.methodChart.data.datasets[0].data = data;
       this.methodChart.update();
     }
   }
@@ -709,14 +806,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     return Number.isInteger(num) ? String(num) : num.toFixed(2);
   }
 
-  private extractError(error: any, fallback: string): string {
-    return (
-      error?.error?.error
-      || error?.error?.message
-      || error?.error?.code
-      || error?.message
-      || fallback
-    );
+  private extractError(error: HttpErrorResponse | any, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      // Handle specific HTTP status codes for production visibility
+      if (error.status === 0) return 'Cannot reach server. Please check your network connection.';
+      if (error.status === 409) return 'A conflicting pipeline job is already in progress.';
+      if (error.status >= 500) return 'Server-side error occurred. Please contact the backend team.';
+      
+      return error.error?.error || error.error?.message || error.message || fallback;
+    }
+    return error?.message || fallback;
   }
 
   private setupSearchDebounce(): void {
@@ -729,11 +828,17 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private startPolling(): void {
+    // Using exhaustMap ensures we don't start a new request 
+    // if the previous poll is still pending (prevents request piling)
     timer(1500, 5000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadStatsOnly();
-      });
+      .pipe(
+        exhaustMap(() => {
+          this.loadStatsOnly();
+          return EMPTY; // loadStatsOnly manages its own subscriptions
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
 
   private rowKey(rawName: string, rawPub: string): string {
