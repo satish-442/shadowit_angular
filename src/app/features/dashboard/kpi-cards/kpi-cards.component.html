@@ -1,0 +1,135 @@
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
+    <div class="text-xs text-slate-500 font-semibold mb-1">Compliance Match Rate</div>
+    <div class="text-3xl font-bold text-emerald-600 mono">
+      @if (isDashboardLoading) {
+        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      } @else {
+        {{ kpiMatchRate }}
+      }
+    </div>
+    <div class="text-xs text-slate-400 mt-1">Of total packages</div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
+    <div class="text-xs text-slate-500 font-semibold mb-1">Unmatched Rate</div>
+    <div class="text-3xl font-bold text-red-600 mono">
+      @if (isDashboardLoading) {
+        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      } @else {
+        {{ kpiUnmatchedRate }}
+      }
+    </div>
+    <div class="text-xs text-slate-400 mt-1">Packages not found</div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
+    <div class="text-xs text-slate-500 font-semibold mb-1">Review Required</div>
+    <div class="text-3xl font-bold text-yellow-600 mono">
+      @if (isDashboardLoading) {
+        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      } @else {
+        {{ kpiReviewRate }}
+      }
+    </div>
+    <div class="text-xs text-slate-400 mt-1">Needs verification</div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
+    <div class="text-xs text-slate-500 font-semibold mb-1">AI Effectiveness</div>
+    <div class="text-3xl font-bold text-purple-600 mono">
+      @if (isDashboardLoading) {
+        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      } @else {
+        {{ kpiAiEffectiveness }}
+      }
+    </div>
+    <div class="text-xs text-slate-400 mt-1">Records processed</div>
+  </div>
+</div>
+
+<!-- Gap Analysis -->
+<div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+  <h3 class="font-bold text-slate-700 text-sm mb-4">📍 Software Inventory vs CMDB Gap Analysis</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div>
+      <div class="text-xs text-slate-500 mb-2">Total Packages Scanned</div>
+      <div class="text-2xl font-bold text-blue-600 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
+        @else { {{ kpiTotalPackages }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Software from inventory</div>
+    </div>
+    <div>
+      <div class="text-xs text-slate-500 mb-2">Total CMDB Apps</div>
+      <div class="text-2xl font-bold text-indigo-600 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
+        @else { {{ kpiTotalCmdb }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Records in enterprise database</div>
+    </div>
+    <div>
+      <div class="text-xs text-slate-500 mb-2">Shadow IT (Not in CMDB)</div>
+      <div class="text-2xl font-bold text-orange-600 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
+        @else { {{ kpiSamNotCmdb }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Inventory packages without match</div>
+    </div>
+    <div>
+      <div class="text-xs text-slate-500 mb-2">Orphaned CMDB Apps</div>
+      <div class="text-2xl font-bold text-blue-600 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
+        @else { {{ kpiCmdbNotSam }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Database apps not in inventory</div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Performance Metrics -->
+<div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+  <h3 class="font-bold text-slate-700 text-sm mb-4">🤖 AI Performance Metrics</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="border-l-4 border-purple-500 pl-3">
+      <div class="text-xs text-slate-500">AI Processed</div>
+      <div class="text-xl font-bold text-slate-800 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
+        @else { {{ kpiAiProcessed }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Total analyzed</div>
+    </div>
+    <div class="border-l-4 border-green-500 pl-3">
+      <div class="text-xs text-slate-500">AI Success Rate</div>
+      <div class="text-xl font-bold text-slate-800 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
+        @else { {{ kpiAiSuccessRate }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Became compliant</div>
+    </div>
+    <div class="border-l-4 border-yellow-500 pl-3">
+      <div class="text-xs text-slate-500">Pending Review</div>
+      <div class="text-xl font-bold text-slate-800 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
+        @else { {{ kpiPendingReview }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Needs human approval</div>
+    </div>
+    <div class="border-l-4 border-blue-500 pl-3">
+      <div class="text-xs text-slate-500">Automation Rate</div>
+      <div class="text-xl font-bold text-slate-800 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
+        @else { {{ kpiAutomationRate }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Auto-matched</div>
+    </div>
+    <div class="border-l-4 border-indigo-500 pl-3">
+      <div class="text-xs text-slate-500">CMDB Coverage</div>
+      <div class="text-xl font-bold text-slate-800 mono">
+        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
+        @else { {{ kpiCmdbCoverage }} }
+      </div>
+      <div class="text-xs text-slate-400 mt-1">Apps matched</div>
+    </div>
+  </div>
+</div>

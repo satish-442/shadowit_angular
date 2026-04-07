@@ -1,0 +1,15 @@
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+    <h3 class="font-bold text-slate-700 text-sm mb-3">Status Distribution</h3>
+    <div class="chart-container"><canvas #statusCanvas></canvas></div>
+    <div class="text-xs text-slate-500 mt-2 text-center">Compliant | Shadow IT | Review</div>
+  </div>
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
+    <h3 class="font-bold text-slate-700 text-sm mb-3">
+      Match Method Breakdown
+      <span class="text-xs text-slate-400">(Matched Only)</span>
+    </h3>
+    <div class="chart-container"><canvas #methodCanvas></canvas></div>
+    <div class="text-xs text-slate-500 mt-2 text-center">Exact Match + AI-Assisted = Total Matches</div>
+  </div>
+</div>
