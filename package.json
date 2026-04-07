@@ -25,6 +25,8 @@
     "@angular/build": "^21.2.6",
     "@angular/cli": "^21.2.6",
     "@angular/compiler-cli": "^21.2.7",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
     "typescript": "~5.9.3"
   }
 }

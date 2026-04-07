@@ -13,8 +13,7 @@
       <button
         (click)="startIngestion()"
         [disabled]="isBusy"
-        class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded transition-colors disabled:opacity-60"
-        >
+        class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded transition-colors disabled:opacity-60">
         {{ pipelineButtonLabel }}
       </button>
       <!-- <button
@@ -28,6 +27,7 @@
   </header>
 
   <main class="flex-1 flex">
+    <!-- Sidebar -->
     <aside class="w-72 bg-white border-r border-slate-200 flex flex-col p-6 gap-6 overflow-y-auto">
       <div>
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Live Metrics</h3>
@@ -58,362 +58,55 @@
           <button
             (click)="triggerAI()"
             [disabled]="!canRunAi"
-            class="w-full bg-white border border-blue-200 text-blue-700 text-xs font-bold py-2 rounded hover:bg-blue-100 disabled:opacity-50"
-            >
+            class="w-full bg-white border border-blue-200 text-blue-700 text-xs font-bold py-2 rounded hover:bg-blue-100 disabled:opacity-50">
             {{ aiButtonLabel }}
           </button>
           <button
             (click)="downloadResults()"
-            class="w-full bg-white border border-blue-200 text-blue-700 text-xs font-bold py-2 rounded hover:bg-blue-100"
-            >
+            class="w-full bg-white border border-blue-200 text-blue-700 text-xs font-bold py-2 rounded hover:bg-blue-100">
             Download Results
           </button>
         </div>
       </div>
 
       @if (error) {
-        <div class="text-xs text-red-700 bg-red-50 border border-red-200 rounded p-3">
-          {{ error }}
-        </div>
+        <div class="text-xs text-red-700 bg-red-50 border border-red-200 rounded p-3">{{ error }}</div>
       }
     </aside>
 
+    <!-- Main content -->
     <section class="flex-1 flex flex-col bg-slate-50 p-6 min-w-0 overflow-y-auto">
-      <div class="flex gap-6 mb-6 border-b border-slate-200 pb-0">
+      <!-- Tabs -->
+      <div class="flex gap-6 mb-6 border-b border-slate-200">
         <button
           (click)="switchTab('dashboard')"
           [class.tab-active]="currentTab === 'dashboard'"
           [class.tab-inactive]="currentTab !== 'dashboard'"
-          class="px-4 py-3 font-semibold text-sm"
-          >
+          class="px-4 py-3 font-semibold text-sm">
           📊 Dashboard
         </button>
         <button
           (click)="switchTab('table')"
           [class.tab-active]="currentTab === 'table'"
           [class.tab-inactive]="currentTab !== 'table'"
-          class="px-4 py-3 font-semibold text-sm"
-          >
+          class="px-4 py-3 font-semibold text-sm">
           📋 Results
         </button>
       </div>
 
+      <!-- Dashboard tab -->
       <div [class.hidden]="currentTab !== 'dashboard'" class="flex-1 overflow-y-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
-            <div class="text-xs text-slate-500 font-semibold mb-1">Compliance Match Rate</div>
-            <div class="text-3xl font-bold text-emerald-600 mono">
-              @if (isDashboardLoading) {
-                <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-              } @else {
-                {{ kpiMatchRate }}
-              }
-            </div>
-            <div class="text-xs text-slate-400 mt-1">Of total packages</div>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
-            <div class="text-xs text-slate-500 font-semibold mb-1">Unmatched Rate</div>
-            <div class="text-3xl font-bold text-red-600 mono">
-              @if (isDashboardLoading) {
-                <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-              } @else {
-                {{ kpiUnmatchedRate }}
-              }
-            </div>
-            <div class="text-xs text-slate-400 mt-1">Packages not found</div>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
-            <div class="text-xs text-slate-500 font-semibold mb-1">Review Required</div>
-            <div class="text-3xl font-bold text-yellow-600 mono">
-              @if (isDashboardLoading) {
-                <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-              } @else {
-                {{ kpiReviewRate }}
-              }
-            </div>
-            <div class="text-xs text-slate-400 mt-1">Needs verification</div>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
-            <div class="text-xs text-slate-500 font-semibold mb-1">AI Effectiveness</div>
-            <div class="text-3xl font-bold text-purple-600 mono">
-              @if (isDashboardLoading) {
-                <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-              } @else {
-                {{ kpiAiEffectiveness }}
-              }
-            </div>
-            <div class="text-xs text-slate-400 mt-1">Records processed</div>
-          </div>
-        </div>
+        <!-- KPI cards + gap analysis + AI metrics -->
+        <app-kpi-cards [kpi]="kpi" [isDashboardLoading]="isDashboardLoading" />
 
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-          <h3 class="font-bold text-slate-700 text-sm mb-4">📍 Software Inventory vs CMDB Gap Analysis</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <div class="text-xs text-slate-500 mb-2">Total Packages Scanned</div>
-              <div class="text-2xl font-bold text-blue-600 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
-                } @else {
-                  {{ kpiTotalPackages }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Software from inventory</div>
-            </div>
-            <div>
-              <div class="text-xs text-slate-500 mb-2">Total CMDB Apps</div>
-              <div class="text-2xl font-bold text-indigo-600 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
-                } @else {
-                  {{ kpiTotalCmdb }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Records in enterprise database</div>
-            </div>
-            <div>
-              <div class="text-xs text-slate-500 mb-2">Shadow IT (Not in CMDB)</div>
-              <div class="text-2xl font-bold text-orange-600 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
-                } @else {
-                  {{ kpiSamNotCmdb }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Inventory packages without match</div>
-            </div>
-            <div>
-              <div class="text-xs text-slate-500 mb-2">Orphaned CMDB Apps</div>
-              <div class="text-2xl font-bold text-blue-600 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
-                } @else {
-                  {{ kpiCmdbNotSam }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Database apps not in inventory</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-            <h3 class="font-bold text-slate-700 text-sm mb-3">Status Distribution</h3>
-            <div class="chart-container"><canvas #statusCanvas></canvas></div>
-            <div class="text-xs text-slate-500 mt-2 text-center">Compliant | Shadow IT | Review</div>
-          </div>
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
-            <h3 class="font-bold text-slate-700 text-sm mb-3">Match Method Breakdown <span class="text-xs text-slate-400">(Matched Only)</span></h3>
-            <div class="chart-container"><canvas #methodCanvas></canvas></div>
-            <div class="text-xs text-slate-500 mt-2 text-center">Exact Match + AI-Assisted = Total Matches</div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-          <h3 class="font-bold text-slate-700 text-sm mb-4">🤖 AI Performance Metrics</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="border-l-4 border-purple-500 pl-3">
-              <div class="text-xs text-slate-500">AI Processed</div>
-              <div class="text-xl font-bold text-slate-800 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-                } @else {
-                  {{ kpiAiProcessed }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Total analyzed</div>
-            </div>
-            <div class="border-l-4 border-green-500 pl-3">
-              <div class="text-xs text-slate-500">AI Success Rate</div>
-              <div class="text-xl font-bold text-slate-800 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-                } @else {
-                  {{ kpiAiSuccessRate }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Became compliant</div>
-            </div>
-            <div class="border-l-4 border-yellow-500 pl-3">
-              <div class="text-xs text-slate-500">Pending Review</div>
-              <div class="text-xl font-bold text-slate-800 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-                } @else {
-                  {{ kpiPendingReview }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Needs human approval</div>
-            </div>
-            <div class="border-l-4 border-blue-500 pl-3">
-              <div class="text-xs text-slate-500">Automation Rate</div>
-              <div class="text-xl font-bold text-slate-800 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-                } @else {
-                  {{ kpiAutomationRate }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Auto-matched</div>
-            </div>
-            <div class="border-l-4 border-indigo-500 pl-3">
-              <div class="text-xs text-slate-500">CMDB Coverage</div>
-              <div class="text-xl font-bold text-slate-800 mono">
-                @if (isDashboardLoading) {
-                  <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-                } @else {
-                  {{ kpiCmdbCoverage }}
-                }
-              </div>
-              <div class="text-xs text-slate-400 mt-1">Apps matched</div>
-            </div>
-          </div>
-        </div>
+        <!-- Charts — [visible] lets the component re-init when the tab is shown -->
+        <app-charts [chartData]="chartData" [visible]="currentTab === 'dashboard'" />
       </div>
 
+      <!-- Results tab -->
       <div [class.hidden]="currentTab !== 'table'" class="flex-1 flex flex-col overflow-hidden">
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col overflow-hidden mb-6" style="max-height: 560px;">
-          <!-- Toolbar: always-visible filter row -->
-          <div class="border-b border-slate-200 flex-shrink-0 relative z-20">
-            <div class="h-12 flex items-center justify-between px-4 bg-slate-50/50 gap-3">
-              <div class="flex items-center gap-2">
-              <h2 class="font-bold text-slate-700 text-sm mr-2">Ingestion Results</h2>
-              <select
-                [(ngModel)]="statusFilter"
-                (ngModelChange)="onStatusFilterChange()"
-                class="border border-slate-300 rounded text-xs px-2 py-1 bg-white focus:outline-none focus:border-blue-500"
-                >
-                <option value="ALL">Show All</option>
-                <option value="Compliant">Compliant Only</option>
-                <option value="REVIEW">Review Only</option>
-                <option value="Shadow IT">Shadow IT Only</option>
-              </select>
-              <select
-                [(ngModel)]="methodFilter"
-                (ngModelChange)="onMethodFilterChange()"
-                class="border border-slate-300 rounded text-xs px-2 py-1 bg-white focus:outline-none focus:border-blue-500"
-                >
-                @for (method of filteredMethodOptions; track method) {
-                  <option [value]="method">
-                    {{ method === 'ALL' ? 'All Methods' : method }}
-                  </option>
-                }
-              </select>
-              <input
-                [(ngModel)]="searchTerm"
-                (keyup)="onSearchChange()"
-                type="text"
-                placeholder="Search software..."
-                  class="border border-slate-300 rounded text-xs px-2 py-1 bg-white focus:outline-none focus:border-blue-500 w-48"
-                />
-              </div>
-              <div class="flex gap-2 items-center relative z-30">
-                <button
-                  (click)="toggleAIFilter()"
-                  [disabled]="isTableLoading"
-                  [ngClass]="aiFilterActive ? 'bg-purple-100 text-purple-700' : 'text-slate-500'"
-                  class="hover:text-purple-600 hover:bg-purple-50 px-2 py-1 rounded transition-all"
-                  title="Show only AI-processed records"
-                  >
-                  ⚡
-                </button>
-                <button (click)="refreshTable(false)" [disabled]="isTableLoading" class="text-slate-500 hover:text-blue-600 text-xs disabled:opacity-50">Refresh</button>
-              </div>
-            </div>
-
-            <!-- Contextual selection action bar — only visible when rows are checked -->
-            @if (hasSelection) {
-              <div class="h-10 flex items-center gap-3 px-4 bg-blue-50 border-t border-blue-100">
-                <span class="text-xs font-semibold text-blue-700">Mark selected as:</span>
-                <button (click)="bulkUpdateStatus('Compliant')" class="text-xs px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium hover:bg-green-200 transition-colors" title="Mark selected as Compliant">✓ Compliant</button>
-                <button (click)="bulkUpdateStatus('REVIEW')" class="text-xs px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full font-medium hover:bg-yellow-200 transition-colors" title="Mark selected for Review">? Review</button>
-                <button (click)="bulkUpdateStatus('Shadow IT')" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded-full font-medium hover:bg-red-200 transition-colors" title="Mark selected as Shadow IT">✗ Shadow IT</button>
-                <div class="w-px h-4 bg-blue-200 mx-1"></div>
-                <button (click)="clearSelection()" class="text-xs px-3 py-1 bg-white border border-slate-300 text-slate-600 rounded-full font-medium hover:bg-slate-100 transition-colors">Clear</button>
-              </div>
-            }
-            </div>
-
-            <div class="table-wrapper flex-1">
-              <table class="w-full text-left text-sm whitespace-nowrap">
-                <thead class="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10 shadow-sm">
-                  <tr>
-                    <th class="px-2 py-3 border-b">
-                      <input type="checkbox" [checked]="allRowsSelected" (change)="toggleSelectAll($any($event.target).checked)" class="cursor-pointer" />
-                    </th>
-                    <th class="px-4 py-3 border-b cursor-pointer hover:bg-slate-100" (click)="toggleSort('status')">
-                      Status <span>{{ sortIndicator('status') }}</span>
-                    </th>
-                    <th class="px-4 py-3 border-b cursor-pointer hover:bg-slate-100" (click)="toggleSort('raw_name')">
-                      Package Name <span>{{ sortIndicator('raw_name') }}</span>
-                    </th>
-                    <th class="px-4 py-3 border-b cursor-pointer hover:bg-slate-100" (click)="toggleSort('publisher')">
-                      Publisher <span>{{ sortIndicator('publisher') }}</span>
-                    </th>
-                    <th class="px-4 py-3 border-b cursor-pointer hover:bg-slate-100" (click)="toggleSort('method')">
-                      Match Method <span>{{ sortIndicator('method') }}</span>
-                    </th>
-                    <th class="px-4 py-3 border-b">Application ID</th>
-                    <th class="px-4 py-3 border-b">CMDB Match</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  @for (row of rows; track row) {
-                    <tr class="hover:bg-slate-50 transition-colors">
-                      <td class="px-2 py-2">
-                        <input
-                          type="checkbox"
-                          class="cursor-pointer"
-                          [checked]="isRowSelected(row)"
-                          (change)="toggleRowSelection(row, $any($event.target).checked)"
-                          />
-                        </td>
-                        <td class="px-4 py-2">
-                          <span [class]="statusBadgeClass(row.status)">{{ row.status }}</span>
-                        </td>
-                        <td class="px-4 py-2 font-mono text-xs text-slate-700" [title]="row.package_name">{{ row.package_name }}</td>
-                        <td class="px-4 py-2 text-xs text-slate-600">{{ row.publisher || '-' }}</td>
-                        <td class="px-4 py-2 text-xs" [class]="methodClass(row.match_method)">{{ row.match_method || '-' }}</td>
-                        <td class="px-4 py-2 text-xs">{{ row.status === 'Shadow IT' ? '-' : (row.application_id || '-') }}</td>
-                        <td class="px-4 py-2 text-xs" [title]="row.reasoning || ''">{{ displayCmdb(row) }}</td>
-                      </tr>
-                    }
-                    @if (rows.length === 0) {
-                      <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-slate-400">{{ isTableLoading ? 'Loading records...' : 'No records found' }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="h-10 border-t border-slate-200 flex items-center justify-between px-4 text-xs text-slate-500 flex-shrink-0">
-                <span>
-                  Page {{ currentPage }} of {{ totalPages }} | Showing {{ displayStart }}-{{ displayEnd }} of {{ totalRows }} records
-                  @if (aiFilterActive) {
-                    <span> | ⚡ AI Only</span>
-                  }
-                </span>
-                <div class="flex gap-2 items-center">
-                  <span class="text-slate-600 font-semibold">Page {{ currentPage }} / {{ totalPages }}</span>
-                  <button
-                    (click)="changePage(-1)"
-                    [disabled]="currentPage <= 1"
-                    class="px-2 py-1 border rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                    Prev
-                  </button>
-                  <button
-                    (click)="changePage(1)"
-                    [disabled]="currentPage >= totalPages"
-                    class="px-2 py-1 border rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+        <app-results-table />
+      </div>
+    </section>
+  </main>
+</div>

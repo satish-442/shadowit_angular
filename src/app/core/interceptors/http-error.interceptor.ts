@@ -12,12 +12,6 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
     setHeaders: { 'X-Request-ID': requestId },
   });
 
-  console.log(`[HTTP Request ${requestId}] ${request.method} ${request.url}`, {
-    url: request.urlWithParams,
-    headers: request.headers,
-    body: request.body
-  });
-
   const retryable = request.method === 'GET';
 
   return next(request).pipe(

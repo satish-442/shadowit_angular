@@ -130,7 +130,10 @@ export class ApiService {
   }
 
   exportResults(status = 'ALL'): void {
-    window.open(`${this.base}/export?status=${status}`, '_blank');
+    const a = document.createElement('a');
+    a.href = `${this.base}/export?status=${status}`;
+    a.download = '';
+    a.click();
   }
 
   auditUiEvent(payload: UiAuditPayload): Observable<{ message: string }> {
