@@ -1,4 +1,4 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { throwError, timer } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs';
 
@@ -10,6 +10,12 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   const request = req.clone({
     setHeaders: { 'X-Request-ID': requestId },
+  });
+
+  console.log(`[HTTP Request ${requestId}] ${request.method} ${request.url}`, {
+    url: request.urlWithParams,
+    headers: request.headers,
+    body: request.body
   });
 
   const retryable = request.method === 'GET';
