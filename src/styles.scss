@@ -1,3 +1,17 @@
+:root {
+  --brand-carbon: #1e3246;
+  --brand-blueprint: #142846;
+  --brand-ultramarine: #2850f0;
+  --brand-vibrant-red: #dc3223;
+  --brand-limestone: #e6e6f0;
+  --brand-ecosystem-green: #78c86e;
+  --brand-visionary-purple: #9646dc;
+  --brand-integrity-gold: #9b875f;
+  --brand-surface: #ffffff;
+  --brand-text: #111827;
+  --brand-muted: #64748b;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,11 +22,24 @@ body {
   padding: 0;
   min-height: 100%;
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  background: #f8fafc;
+  background: #eef2f7;
+  color: var(--brand-text);
 }
 
 button,
 input,
 select {
   font: inherit;
+}
+
+.text-brand-ai {
+  color: var(--brand-visionary-purple);
+}
+
+.text-brand-success {
+  color: var(--brand-ecosystem-green);
+}
+
+.text-brand-alert {
+  color: var(--brand-vibrant-red);
 }

@@ -19,16 +19,75 @@
 
 .kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(30, 50, 70, 0.14);
 }
 
-.tab-active {
-  border-bottom: 2px solid #2563eb;
-  color: #1e40af;
+.brand-header {
+  background: var(--brand-carbon);
+  color: white;
 }
 
-.tab-inactive {
-  color: #64748b;
+.brand-logo {
+  background: var(--brand-ultramarine);
+}
+
+.brand-status {
+  background: rgba(120, 200, 110, 0.16);
+  color: var(--brand-ecosystem-green);
+}
+
+.brand-button-primary {
+  background: var(--brand-ultramarine);
+  color: white;
+}
+
+.brand-button-primary:hover {
+  background: #1f3fd7;
+}
+
+.brand-button-alt {
+  background: white;
+  border: 1px solid rgba(40, 80, 240, 0.22);
+  color: var(--brand-ultramarine);
+}
+
+.brand-button-alt:hover {
+  background: rgba(40, 80, 240, 0.08);
+}
+
+.brand-panel-success {
+  background: rgba(120, 200, 110, 0.14);
+  border-color: rgba(120, 200, 110, 0.28);
+}
+
+.brand-panel-warning {
+  background: rgba(155, 135, 95, 0.12);
+  border-color: rgba(155, 135, 95, 0.25);
+}
+
+.brand-panel-danger {
+  background: rgba(220, 50, 35, 0.12);
+  border-color: rgba(220, 50, 35, 0.25);
+}
+
+.brand-panel-info {
+  background: rgba(40, 80, 240, 0.08);
+  border-color: rgba(40, 80, 240, 0.2);
+}
+
+.brand-tab-active {
+  border-bottom: 2px solid var(--brand-ultramarine);
+  color: var(--brand-blueprint);
+}
+
+.brand-tab-inactive {
+  color: var(--brand-muted);
+}
+
+.brand-error {
+  color: var(--brand-vibrant-red);
+  background: rgba(220, 50, 35, 0.12);
+  border-color: rgba(220, 50, 35, 0.2);
 }
 
 .table-wrapper {
@@ -50,19 +109,19 @@
 }
 
 .badge-green {
-  background: #dcfce7;
-  color: #15803d;
+  background: rgba(120, 200, 110, 0.16);
+  color: var(--brand-ecosystem-green);
 }
 
 .badge-yellow {
-  background: #fef9c3;
-  color: #854d0e;
-  border: 1px solid #fef08a;
+  background: rgba(155, 135, 95, 0.14);
+  color: var(--brand-integrity-gold);
+  border: 1px solid rgba(155, 135, 95, 0.2);
 }
 
 .badge-red {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: rgba(220, 50, 35, 0.12);
+  color: var(--brand-vibrant-red);
 }
 
 .dot {
@@ -73,16 +132,16 @@
 }
 
 .dot-idle {
-  background: #64748b;
+  background: var(--brand-muted);
 }
 
 .dot-running {
-  background: #22c55e;
+  background: var(--brand-ecosystem-green);
   animation: pulse 1.5s infinite;
 }
 
 .dot-error {
-  background: #ef4444;
+  background: var(--brand-vibrant-red);
 }
 
 @keyframes pulse {

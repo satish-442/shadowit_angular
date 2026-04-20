@@ -1,48 +1,36 @@
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
   <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
     <div class="text-xs text-slate-500 font-semibold mb-1">Compliance Match Rate</div>
-    <div class="text-3xl font-bold text-emerald-600 mono">
-      @if (isDashboardLoading) {
-        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-      } @else {
-        {{ kpiMatchRate }}
-      }
+    <div class="text-3xl font-bold text-[var(--brand-ecosystem-green)] mono">
+      <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      <span *ngIf="!isDashboardLoading">{{ kpiMatchRate }}</span>
     </div>
     <div class="text-xs text-slate-400 mt-1">Of total packages</div>
   </div>
 
   <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
     <div class="text-xs text-slate-500 font-semibold mb-1">Unmatched Rate</div>
-    <div class="text-3xl font-bold text-red-600 mono">
-      @if (isDashboardLoading) {
-        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-      } @else {
-        {{ kpiUnmatchedRate }}
-      }
+    <div class="text-3xl font-bold text-[var(--brand-vibrant-red)] mono">
+      <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      <span *ngIf="!isDashboardLoading">{{ kpiUnmatchedRate }}</span>
     </div>
     <div class="text-xs text-slate-400 mt-1">Packages not found</div>
   </div>
 
   <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
     <div class="text-xs text-slate-500 font-semibold mb-1">Review Required</div>
-    <div class="text-3xl font-bold text-yellow-600 mono">
-      @if (isDashboardLoading) {
-        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-      } @else {
-        {{ kpiReviewRate }}
-      }
+    <div class="text-3xl font-bold text-[var(--brand-integrity-gold)] mono">
+      <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      <span *ngIf="!isDashboardLoading">{{ kpiReviewRate }}</span>
     </div>
     <div class="text-xs text-slate-400 mt-1">Needs verification</div>
   </div>
 
   <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 kpi-card">
     <div class="text-xs text-slate-500 font-semibold mb-1">AI Effectiveness</div>
-    <div class="text-3xl font-bold text-purple-600 mono">
-      @if (isDashboardLoading) {
-        <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
-      } @else {
-        {{ kpiAiEffectiveness }}
-      }
+    <div class="text-3xl font-bold text-[var(--brand-visionary-purple)] mono">
+      <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+      <span *ngIf="!isDashboardLoading">{{ kpiAiEffectiveness }}</span>
     </div>
     <div class="text-xs text-slate-400 mt-1">Records processed</div>
   </div>
@@ -54,33 +42,33 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
     <div>
       <div class="text-xs text-slate-500 mb-2">Total Packages Scanned</div>
-      <div class="text-2xl font-bold text-blue-600 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
-        @else { {{ kpiTotalPackages }} }
+      <div class="text-2xl font-bold text-[var(--brand-ultramarine)] mono">
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiTotalPackages }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Software from inventory</div>
     </div>
     <div>
       <div class="text-xs text-slate-500 mb-2">Total CMDB Apps</div>
-      <div class="text-2xl font-bold text-indigo-600 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
-        @else { {{ kpiTotalCmdb }} }
+      <div class="text-2xl font-bold text-[var(--brand-blueprint)] mono">
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiTotalCmdb }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Records in enterprise database</div>
     </div>
     <div>
       <div class="text-xs text-slate-500 mb-2">Shadow IT (Not in CMDB)</div>
-      <div class="text-2xl font-bold text-orange-600 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
-        @else { {{ kpiSamNotCmdb }} }
+      <div class="text-2xl font-bold text-[var(--brand-vibrant-red)] mono">
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiSamNotCmdb }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Inventory packages without match</div>
     </div>
     <div>
       <div class="text-xs text-slate-500 mb-2">Orphaned CMDB Apps</div>
-      <div class="text-2xl font-bold text-blue-600 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span> }
-        @else { {{ kpiCmdbNotSam }} }
+      <div class="text-2xl font-bold text-[var(--brand-ultramarine)] mono">
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Waiting...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiCmdbNotSam }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Database apps not in inventory</div>
     </div>
@@ -91,43 +79,43 @@
 <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
   <h3 class="font-bold text-slate-700 text-sm mb-4">🤖 AI Performance Metrics</h3>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-    <div class="border-l-4 border-purple-500 pl-3">
+    <div class="border-l-4 pl-3" style="border-color: var(--brand-visionary-purple)">
       <div class="text-xs text-slate-500">AI Processed</div>
       <div class="text-xl font-bold text-slate-800 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
-        @else { {{ kpiAiProcessed }} }
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiAiProcessed }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Total analyzed</div>
     </div>
-    <div class="border-l-4 border-green-500 pl-3">
+    <div class="border-l-4 pl-3" style="border-color: var(--brand-ecosystem-green)">
       <div class="text-xs text-slate-500">AI Success Rate</div>
       <div class="text-xl font-bold text-slate-800 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
-        @else { {{ kpiAiSuccessRate }} }
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiAiSuccessRate }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Became compliant</div>
     </div>
-    <div class="border-l-4 border-yellow-500 pl-3">
+    <div class="border-l-4 pl-3" style="border-color: var(--brand-integrity-gold)">
       <div class="text-xs text-slate-500">Pending Review</div>
       <div class="text-xl font-bold text-slate-800 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
-        @else { {{ kpiPendingReview }} }
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiPendingReview }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Needs human approval</div>
     </div>
-    <div class="border-l-4 border-blue-500 pl-3">
+    <div class="border-l-4 pl-3" style="border-color: var(--brand-ultramarine)">
       <div class="text-xs text-slate-500">Automation Rate</div>
       <div class="text-xl font-bold text-slate-800 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
-        @else { {{ kpiAutomationRate }} }
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiAutomationRate }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Auto-matched</div>
     </div>
-    <div class="border-l-4 border-indigo-500 pl-3">
+    <div class="border-l-4 pl-3" style="border-color: var(--brand-blueprint)">
       <div class="text-xs text-slate-500">CMDB Coverage</div>
       <div class="text-xl font-bold text-slate-800 mono">
-        @if (isDashboardLoading) { <span class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span> }
-        @else { {{ kpiCmdbCoverage }} }
+        <span *ngIf="isDashboardLoading" class="text-sm text-slate-400 animate-pulse font-normal">Loading...</span>
+        <span *ngIf="!isDashboardLoading">{{ kpiCmdbCoverage }}</span>
       </div>
       <div class="text-xs text-slate-400 mt-1">Apps matched</div>
     </div>

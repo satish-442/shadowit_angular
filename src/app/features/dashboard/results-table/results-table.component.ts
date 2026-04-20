@@ -18,6 +18,7 @@ interface PendingAction {
   selector: 'app-results-table',
   standalone: false,
   templateUrl: './results-table.component.html',
+  styleUrls: ['./results-table.component.scss'],
 })
 export class ResultsTableComponent implements OnInit, OnDestroy {
   readonly PAGE_SIZE = 50;
@@ -160,13 +161,17 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
   toggleSelectAll(checked: boolean): void {
     if (!checked) {
       this.rows.forEach(r => this.removeSelection(r.package_name, r.publisher));
+      this.refreshPendingActionCount();
       return;
     }
+
     this.rows.forEach(r => {
       if (!this.isRowSelected(r)) {
         this.selectedRecords.push({ raw_name: r.package_name || '', raw_pub: r.publisher || '' });
       }
     });
+
+    this.refreshPendingActionCount();
   }
 
   toggleRowSelection(row: ResultItem, checked: boolean): void {
@@ -177,6 +182,8 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
     } else {
       this.removeSelection(row.package_name, row.publisher);
     }
+
+    this.refreshPendingActionCount();
   }
 
   clearSelection(): void {
@@ -227,9 +234,9 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
 
   methodClass(method: string): string {
     const m = (method || '').toUpperCase();
-    if (m.includes('AI')) return 'text-purple-700 font-semibold';
-    if (m.includes('EXACT')) return 'text-green-700 font-semibold';
-    if (m.includes('FUZZY')) return 'text-orange-700 font-semibold';
+    if (m.includes('AI')) return 'text-brand-ai font-semibold';
+    if (m.includes('EXACT')) return 'text-brand-success font-semibold';
+    if (m.includes('FUZZY')) return 'text-brand-alert font-semibold';
     return 'text-slate-600';
   }
 
@@ -307,6 +314,23 @@ export class ResultsTableComponent implements OnInit, OnDestroy {
   private removeSelection(rawName: string, rawPub: string): void {
     const key = this.rowKey(rawName, rawPub);
     this.selectedRecords = this.selectedRecords.filter(r => this.rowKey(r.raw_name, r.raw_pub) !== key);
+    this.refreshPendingActionCount();
+  }
+
+  private refreshPendingActionCount(): void {
+    if (!this.pendingAction) {
+      return;
+    }
+
+    if (this.selectedRecords.length === 0) {
+      this.pendingAction = null;
+      return;
+    }
+
+    this.pendingAction = {
+      ...this.pendingAction,
+      count: this.selectedRecords.length,
+    };
   }
 
   private extractError(error: Error | unknown, fallback: string): string {

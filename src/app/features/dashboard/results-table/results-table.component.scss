@@ -1,0 +1,54 @@
+.results-table-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.table-wrapper {
+  flex: 1;
+  min-height: 320px;
+  max-height: 640px;
+  overflow-y: auto;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-wrapper table {
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.125rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badge-green {
+  background: rgba(120, 200, 110, 0.16);
+  color: var(--brand-ecosystem-green);
+}
+
+.badge-yellow {
+  background: rgba(155, 135, 95, 0.14);
+  color: var(--brand-integrity-gold);
+  border: 1px solid rgba(155, 135, 95, 0.2);
+}
+
+.badge-red {
+  background: rgba(220, 50, 35, 0.12);
+  color: var(--brand-vibrant-red);
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 1;
+}
